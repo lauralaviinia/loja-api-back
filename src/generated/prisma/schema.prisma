@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+model Categoria {
+  id        Int       @id @default(autoincrement())
+  nome      String    @unique
+  descricao String?
+  produto   Produto[] // Relação: uma categoria pode ter vários produtos
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("categorias")
+}
+
+model Produto {
+  id          Int          @id @default(autoincrement())
+  nome        String
+  descricao   String?
+  preco       Float        @default(0)
+  estoque     Int          @default(0)
+  categoriaId Int?
+  items       PedidoItem[] // Relação: um produto pode estar em mais de um pedido
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relações (chaves estrangeiras)
+  categoria Categoria? @relation(fields: [categoriaId], references: [id])
+
+  @@map("produtos")
+}
+
+model Cliente {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  cpf       String   @unique
+  telefone  String?
+  pedidos   Pedido[] // Relação: um cliente pode ter vários pedidos
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("clientes")
+}
+
+model Pedido {
+  id        Int          @id @default(autoincrement())
+  clienteId Int
+  data      DateTime
+  total     Float        @default(0)
+  status    String       @default("PENDENTE")
+  items     PedidoItem[] // Relação: um pedido pode ter vários itens
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // Relações (chaves estrangeiras)
+  cliente Cliente @relation(fields: [clienteId], references: [id])
+
+  @@map("pedidos")
+}
+
+model PedidoItem {
+  id         Int      @id @default(autoincrement())
+  pedidoId   Int
+  produtoId  Int
+  quantidade Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relações (chaves estrangeiras)
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id])
+  produto Produto @relation(fields: [produtoId], references: [id])
+
+  @@map("pedidos_itens") // Nome da tabela no banco de dados
+}

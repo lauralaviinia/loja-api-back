@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", // Versão do JavaScript de saída
+    "module": "commonjs", // Sistema de módulos
+    "outDir": "./dist", // Onde o JavaScript compilado será salvo
+    "rootDir": "./src", // Onde nosso código .ts estará
+    "strict": true, // Habilita todas as checagens de tipo estritas
+    "esModuleInterop": true, // Permite compatibilidade entre módulos CommonJS e ES
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+}
