@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { da } from "zod/v4/locales";
 
 // ==============================
 // Schema para Categoria
@@ -21,13 +20,14 @@ export const createProdutoSchema = z.object({
     .string()
     .min(2, "Nome do produto deve ter pelo menos 2 caracteres")
     .max(150, "Nome do produto deve ter no máximo 150 caracteres"),
-  preco: z
-    .number()
-    .positive("Preço deve ser um número positivo"),
+
+  preco: z.number().positive("Preço deve ser um número positivo"),
+
   estoque: z
     .number()
     .int("Estoque deve ser um número inteiro")
     .nonnegative("Estoque não pode ser negativo"),
+
   categoriaId: z
     .number()
     .int("ID da categoria deve ser um número inteiro")
@@ -44,36 +44,16 @@ export const getProductsQuerySchema = z.object({
 // Schema para Cliente
 // ==============================
 export const createClienteSchema = z.object({
-  nome: z
-    .string()
-    .min(2, "Nome deve ter pelo menos 2 caracteres")
-    .max(100, "Nome deve ter no máximo 100 caracteres"),
-  email: z
-    .string()
-    .email({ message: "Email deve ter um formato válido" })
-    .max(255, "Email deve ter no máximo 255 caracteres"),
-  cpf: z
-    .string()
-    .length(11, "CPF deve ter exatamente 11 dígitos")
-    .regex(/^\d+$/, "CPF deve conter apenas números"),
-  telefone: z
-    .string()
-    .min(10, "Telefone deve ter pelo menos 10 caracteres")
-    .max(15, "Telefone deve ter no máximo 15 caracteres")
-    .optional(),
-  dataNascimento: z
-    .string()
-    .optional()
-    .refine((date) => {
-      if (date === undefined || date === null || date === "") return true;
-      const parsed = new Date(date);
-      return !isNaN(parsed.getTime());
-    }, "Data de nascimento deve ser válida")
-    .refine((date) => {
-      if (date === undefined || date === null || date === "") return true;
-      const parsed = new Date(date);
-      return parsed <= new Date();
-    }, "Data de nascimento não pode ser no futuro"),
+  nome: z.string().min(2).max(100),
+
+  email: z.string().email().max(255),
+
+  cpf: z.string().length(11).regex(/^\d+$/),
+
+  telefone: z.string().min(10).max(15).optional(),
+
+  dataNascimento: z.string().optional(),
+
   senha: z
     .string()
     .min(4, "A senha deve ter pelo menos 4 caracteres")
@@ -83,50 +63,16 @@ export const createClienteSchema = z.object({
 
 export const updateClienteSchema = z.object({
   nome: z.string().min(2).max(100).optional(),
+
   email: z.string().email().max(255).optional(),
+
   cpf: z.string().length(11).regex(/^\d+$/).optional(),
 
-  telefone: z
-    .string()
-    .optional()
-    .nullable()
-    .transform((val) => (val === "" ? undefined : val)),
+  telefone: z.string().optional().nullable(),
 
-  dataNascimento: z
-  .string()
-  .nullable()
-  .optional()
-  .transform((val) => {
-    if (val === null || val === "") return undefined;
-    return val;
-  })
-  .refine((date) => {
-    if (date === undefined) return true;
-    const parsed = new Date(date);
-    return !isNaN(parsed.getTime());
-  }, "Data de nascimento deve ser válida")
-  .refine((date) => {
-    if (date === undefined) return true;
-    const parsed = new Date(date);
-    return parsed <= new Date();
-  }, "Data de nascimento não pode ser no futuro"),
+  dataNascimento: z.string().optional().nullable(),
 
-  senha: z
-    .string()
-    .optional()
-    .transform((val) => (val === "" ? undefined : val))
-    .refine(
-      (val) => val === undefined || val.length >= 4,
-      "A senha deve ter pelo menos 4 caracteres"
-    )
-    .refine(
-      (val) => val === undefined || /[a-zA-Z]/.test(val),
-      "A senha deve conter pelo menos uma letra"
-    )
-    .refine(
-      (val) => val === undefined || /[0-9]/.test(val),
-      "A senha deve conter pelo menos um número"
-    ),
+  senha: z.string().optional(),
 });
 
 // ==============================
@@ -137,40 +83,23 @@ export const createPedidoSchema = z.object({
     .number()
     .int("ID do cliente deve ser um número inteiro")
     .positive("ID do cliente deve ser positivo"),
-  dataPedido: z
-    .string()
-    .refine((date) => {
-      const parsedDate = new Date(date);
-      return !isNaN(parsedDate.getTime());
-    }, "Data do pedido deve ser uma data válida")
-    .refine((date) => {
-      const parsedDate = new Date(date);
-      const now = new Date();
-      return parsedDate <= now;
-    }, "Data do pedido não pode ser no futuro"),
+
+  dataPedido: z.string().refine((date) => {
+    const parsedDate = new Date(date);
+    return !isNaN(parsedDate.getTime());
+  }, "Data do pedido deve ser uma data válida"),
 });
 
 export const updatePedidoSchema = createPedidoSchema.partial();
 
 // ==============================
-// Schema para PedidoItem 
+// Schema para PedidoItem
 // ==============================
 export const createPedidoItemSchema = z.object({
-  pedidoId: z
-    .number()
-    .int("ID do pedido deve ser um número inteiro")
-    .positive("ID do pedido deve ser positivo"),
-  produtoId: z
-    .number()
-    .int("ID do produto deve ser um número inteiro")
-    .positive("ID do produto deve ser positivo"),
-  quantidade: z
-    .number()
-    .int("Quantidade deve ser um número inteiro")
-    .positive("Quantidade deve ser positiva"),
-  precoUnitario: z
-    .number()
-    .positive("Preço unitário deve ser positivo"),
+  pedidoId: z.number().int().positive(),
+  produtoId: z.number().int().positive(),
+  quantidade: z.number().int().positive(),
+  precoUnitario: z.number().positive(),
 });
 
 export const updatePedidoItemSchema = createPedidoItemSchema.partial();
