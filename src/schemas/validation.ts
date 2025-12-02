@@ -68,7 +68,7 @@ export const updateClienteSchema = z.object({
 
   cpf: z.string().length(11).regex(/^\d+$/).optional(),
 
-  telefone: z.string().optional().nullable(),
+  telefone: z.string().min(10).max(15).optional().nullable(),
 
   dataNascimento: z.string().optional().nullable(),
 
@@ -76,7 +76,22 @@ export const updateClienteSchema = z.object({
 });
 
 // ==============================
-// Schema para Pedido
+// Schema para PedidoItem (item de um pedido)
+// ==============================
+export const pedidoItemSchema = z.object({
+  produtoId: z
+    .number()
+    .int("ID do produto deve ser um número inteiro")
+    .positive("ID do produto deve ser positivo"),
+  quantidade: z
+    .number()
+    .int("Quantidade deve ser um número inteiro")
+    .positive("Quantidade deve ser maior que zero")
+    .max(10000, "Quantidade não pode exceder 10.000 unidades"),
+});
+
+// ==============================
+// Schema para Pedido (criação com itens)
 // ==============================
 export const createPedidoSchema = z.object({
   clienteId: z
@@ -84,16 +99,26 @@ export const createPedidoSchema = z.object({
     .int("ID do cliente deve ser um número inteiro")
     .positive("ID do cliente deve ser positivo"),
 
-  dataPedido: z.string().refine((date) => {
+  data: z.string().refine((date) => {
     const parsedDate = new Date(date);
     return !isNaN(parsedDate.getTime());
-  }, "Data do pedido deve ser uma data válida"),
+  }, "Data do pedido deve ser uma data válida (ISO 8601)"),
+
+  items: z
+    .array(pedidoItemSchema)
+    .min(1, "Pedido deve conter pelo menos um item")
+    .max(100, "Pedido não pode exceder 100 itens"),
 });
 
-export const updatePedidoSchema = createPedidoSchema.partial();
+export const updatePedidoSchema = z.object({
+  status: z
+    .enum(["PENDENTE", "PAGO", "PROCESSANDO", "ENVIADO", "ENTREGUE", "CANCELADO"])
+    .optional(),
+  items: z.array(pedidoItemSchema).optional(),
+});
 
 // ==============================
-// Schema para PedidoItem
+// Schema para PedidoItem 
 // ==============================
 export const createPedidoItemSchema = z.object({
   pedidoId: z.number().int().positive(),
