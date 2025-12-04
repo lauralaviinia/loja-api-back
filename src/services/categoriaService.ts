@@ -1,14 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { z } from 'zod';
+import { createCategoriaSchema, updateCategoriaSchema } from '../schemas/validation';
+import { ZodError } from 'zod';
 
 const prisma = new PrismaClient();
-
-export const CategoriaCreateSchema = z.object({
-  nome: z.string().min(1, 'Nome é obrigatório').max(100),
-  descricao: z.string().max(500).optional(),
-});
-
-export const CategoriaUpdateSchema = CategoriaCreateSchema.partial();
 
 export class CategoriaService {
   
@@ -55,7 +49,7 @@ export class CategoriaService {
 
   async create(data: any) {
     try {
-      const validatedData = CategoriaCreateSchema.parse(data);
+      const validatedData = createCategoriaSchema.parse(data);
 
       const existingCategoria = await prisma.categoria.findUnique({
         where: { nome: validatedData.nome }
@@ -69,8 +63,8 @@ export class CategoriaService {
         data: validatedData
       });
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        throw new Error(`Dados inválidos: ${error.issues.map(e => e.message).join(', ')}`);
+      if (error instanceof ZodError) {
+        throw new Error(`Dados inválidos: ${error.issues.map((e: any) => e.message).join(', ')}`);
       }
       throw error;
     }
@@ -78,7 +72,7 @@ export class CategoriaService {
 
   async update(id: number, data: any) {
     try {
-      const validatedData = CategoriaUpdateSchema.parse(data);
+      const validatedData = updateCategoriaSchema.parse(data);
 
       const categoria = await this.findById(id);
       if (!categoria) {
@@ -100,8 +94,8 @@ export class CategoriaService {
         data: validatedData
       });
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        throw new Error(`Dados inválidos: ${error.issues.map(e => e.message).join(', ')}`);
+      if (error instanceof ZodError) {
+        throw new Error(`Dados inválidos: ${error.issues.map((e: any) => e.message).join(', ')}`);
       }
       throw error;
     }

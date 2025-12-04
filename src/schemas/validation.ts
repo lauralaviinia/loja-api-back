@@ -6,8 +6,15 @@ import { z } from "zod";
 export const createCategoriaSchema = z.object({
   nome: z
     .string()
-    .min(2, "Nome da categoria deve ter pelo menos 2 caracteres")
+    .min(4, "Nome da categoria deve conter pelo menos 4 letras")
     .max(100, "Nome da categoria deve ter no máximo 100 caracteres"),
+  
+  descricao: z
+    .string()
+    .min(4, "Descrição deve conter pelo menos 4 letras")
+    .max(500, "Descrição deve ter no máximo 500 caracteres")
+    .optional()
+    .nullable(),
 });
 
 export const updateCategoriaSchema = createCategoriaSchema.partial();
@@ -50,9 +57,9 @@ export const createClienteSchema = z.object({
 
   cpf: z.string().length(11).regex(/^\d+$/),
 
-  telefone: z.string().min(10).max(15).optional(),
+  telefone: z.string().min(10).max(15).optional().or(z.literal('')).nullable(),
 
-  dataNascimento: z.string().optional(),
+  dataNascimento: z.string().optional().or(z.literal('')).nullable(),
 
   senha: z
     .string()
